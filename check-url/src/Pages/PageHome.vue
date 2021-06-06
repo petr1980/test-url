@@ -8,11 +8,8 @@
     </v-app-bar>
 
     <v-main>
-      <div class="text-center">
-        <v-btn dark color="indigo" @click="setDevice()"> Open Snackbar </v-btn>
-      </div>
-
-      <pre> {{ res }}</pre>
+      <v-spacer></v-spacer>
+      <app-sheet />
 
       <app-alert v-model="alertOpen" :text="alertText" />
     </v-main>
@@ -22,49 +19,49 @@
 <script>
 import { deviceInfo } from "../api/device";
 import AppAlert from "../components/AppAlert.vue";
+import AppSheet from "../components/AppSheet.vue";
 
 export default {
   name: "PageHome",
 
   components: {
     AppAlert,
+    AppSheet,
   },
 
   created() {
-    this.generateToken();
-    this.getDeviceList();
-    console.log(this.getToken());
+    this.deviseDeviceUrl();
   },
 
   data() {
     return {
       alertText: "You are not in the same device",
       alertOpen: false,
-      res: "",
-      token: "",
     };
   },
 
-  computed: {},
+  computed: {
+    tokenURL() {
+      return this.$route.params?.token;
+    },
+    userAgent() {
+      return navigator.userAgent;
+    },
+    getStorageToken() {
+      return JSON.parse(localStorage.getItem("deviceTokenData"));
+    },
+  },
 
   methods: {
-    getToken() {
-      return this.$route.params;
-    },
-
-    getUserDevice() {
-      return {
-        token: this.token,
-        userAgent: navigator.userAgent,
+    async saveDeviceInfo() {
+      const device = {
+        token: this.tokenURL,
+        userAgent: this.userAgent,
       };
-    },
-
-    async setDevice() {
-      const device = this.getUserDevice();
       try {
         const data = await deviceInfo.save(device);
 
-        this.res = data;
+        this.tokenList = data;
       } catch (error) {
         console.log(error);
       }
@@ -74,10 +71,44 @@ export default {
       try {
         const data = await deviceInfo.getDeviceList();
 
-        this.res = data;
+        return data;
       } catch (error) {
         console.log(error);
       }
+    },
+
+    async deviseDeviceUrl() {
+      const storageDataToken = this.getStorageToken;
+
+      if (storageDataToken && storageDataToken.token === this.tokenURL) {
+        this.confirmed();
+        return;
+      }
+      const deviceList = await this.getDeviceList();
+      Object.values(deviceList || {}).forEach((item) => {
+        if (item.token === this.tokenURL) {
+          return this.saveDeviceInfo().then(() => {
+            this.openAlert("Hi new user!");
+          });
+        }
+      });
+
+      this.openAlert("You are not in the same device!");
+    },
+
+    confirmed() {
+      if (this.$router.query?.validationCode) return;
+      this.$router.replace({
+        query: { validationCode: "randomValidationCode" },
+      });
+      this.$nextTick().then(() => {
+        this.openAlert("Validation code confirmed!!!");
+      });
+    },
+
+    openAlert(text) {
+      this.alertText = text;
+      this.alertOpen = true;
     },
   },
 };

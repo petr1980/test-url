@@ -7,6 +7,7 @@ const routes = [
   {
     path: "/:token",
     name: "Home",
+    query: {},
     component: () => import("../Pages/PageHome.vue"),
   },
 ];
@@ -19,7 +20,6 @@ router.beforeEach((to, from, next) => {
   if (!Object.keys(to.params || {}).length) {
     const token = generateToken();
     next({ path: `/${token}` });
-    console.log(to);
   }
   next();
 });

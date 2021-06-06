@@ -6,10 +6,13 @@ export class deviceInfo {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
-          "Content-Type": "aplication/json",
+          "Content-Type": "application/json",
         },
       }
-    ).then((response) => response.json());
+    ).then((response) => {
+      addToLocalStorage(data);
+      return response.json();
+    });
   }
 
   static getDeviceList() {
@@ -18,11 +21,13 @@ export class deviceInfo {
       {
         method: "GET",
         headers: {
-          "Content-Type": "aplication/json",
+          "Content-Type": "application/json",
         },
       }
     ).then((response) => response.json());
   }
 }
 
-// function addToLocalStorage() {}
+function addToLocalStorage(data) {
+  localStorage.setItem("deviceTokenData", JSON.stringify(data));
+}
