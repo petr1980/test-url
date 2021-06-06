@@ -3,11 +3,7 @@
     <v-row justify="space-around">
       <v-col md="12">
         <v-sheet>
-          <v-sheet
-            :rounded="rounded"
-            class="mx-auto pa-12"
-            color="grey lighten-3"
-          >
+          <v-sheet class="mx-auto pa-12" color="grey lighten-3">
             <v-btn
               con
               href="https://github.com/petr1980/test-url"

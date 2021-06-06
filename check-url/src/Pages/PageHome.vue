@@ -30,7 +30,7 @@ export default {
   },
 
   created() {
-    this.deviseDeviceUrl();
+    this.getDeviceUrl();
   },
 
   data() {
@@ -77,32 +77,39 @@ export default {
       }
     },
 
-    async deviseDeviceUrl() {
+    async getDeviceUrl() {
       const storageDataToken = this.getStorageToken;
 
-      if (storageDataToken && storageDataToken.token === this.tokenURL) {
+      if (storageDataToken?.token === this.tokenURL) {
         this.confirmed();
         return;
       }
       const deviceList = await this.getDeviceList();
-      Object.values(deviceList || {}).forEach((item) => {
-        if (item.token === this.tokenURL) {
-          return this.saveDeviceInfo().then(() => {
-            this.openAlert("Hi new user!");
-          });
-        }
+      const validDevice = Object.values(deviceList || {}).find((item) => {
+        return item.userAgent === this.userAgent;
+      });
+      const checkToken = Object.values(deviceList || {}).find((item) => {
+        return item.token === this.tokenURL;
       });
 
-      this.openAlert("You are not in the same device!");
+      if (!checkToken) {
+        return this.saveDeviceInfo().then(() => {
+          this.openAlert("Hi new user!");
+        });
+      }
+
+      if (validDevice && validDevice.userAgent === checkToken.userAgent) {
+        return this.confirmed();
+      }
+
+      return this.openAlert("You are not in the same device!");
     },
 
     confirmed() {
-      if (this.$router.query?.validationCode) return;
+      this.openAlert("Validation code confirmed!!!");
+      if (this.$route.query?.validationCode) return;
       this.$router.replace({
         query: { validationCode: "randomValidationCode" },
-      });
-      this.$nextTick().then(() => {
-        this.openAlert("Validation code confirmed!!!");
       });
     },
 

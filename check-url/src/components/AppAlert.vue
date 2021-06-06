@@ -1,7 +1,9 @@
 <template>
   <div class="text-center">
     <v-snackbar v-model="snackbar" vertical light>
-      {{ text }}
+      <div class="mb-4 font-weight-medium" :class="[className]">
+        {{ text }}
+      </div>
 
       <template v-slot:action="{ attrs }">
         <v-btn color="primary" v-bind="attrs" @click="close()"> Close </v-btn>
@@ -21,6 +23,10 @@ export default {
     text: {
       type: String,
       default: "",
+    },
+    className: {
+      type: String,
+      default: "back--text",
     },
   },
 
